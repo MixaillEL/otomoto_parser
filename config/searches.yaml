@@ -1,0 +1,41 @@
+# Otomoto Parser – Named Search Configurations
+# Each entry defines a saved search with filters.
+# Run a specific search: python -m app.main scrape --search <name>
+# Run all searches:      python -m app.main scrape
+
+searches:
+
+  bmw_5:
+    label: "BMW 5 Series (2015–2022)"
+    brand: BMW
+    model: "Seria 5"
+    year_from: 2015
+    year_to: 2022
+    price_to: 150000
+    fuel_type: petrol        # petrol | diesel | hybrid | electric
+    sort: price_asc          # price_asc | price_desc | latest
+    max_pages: 5
+
+  audi_a6:
+    label: "Audi A6 diesel (2016+)"
+    brand: Audi
+    model: A6
+    year_from: 2016
+    price_to: 200000
+    fuel_type: diesel
+    sort: latest
+    max_pages: 5
+
+  toyota_electric:
+    label: "Electric Toyota (any year)"
+    brand: Toyota
+    fuel_type: electric
+    sort: price_asc
+    max_pages: 3
+
+  any_suv_cheap:
+    label: "Any SUV under 30 000 PLN"
+    body_type: suv
+    price_to: 30000
+    sort: price_asc
+    max_pages: 10

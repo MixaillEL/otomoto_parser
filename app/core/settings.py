@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-_LEGACY_PROJECT_ROOT = Path(r"c:\My Project\otomoto_parser")
+_LEGACY_ENV_FILE = Path(r"c:\My Project\otomoto_parser\config\.env")
 
 
 def _resolve_env_file() -> Path:
@@ -15,7 +15,7 @@ def _resolve_env_file() -> Path:
     local_env_file = project_root / "config" / ".env"
     if local_env_file.exists():
         return local_env_file
-    return _LEGACY_PROJECT_ROOT / "config" / ".env"
+    return _LEGACY_ENV_FILE
 
 
 _ENV_FILE = _resolve_env_file()

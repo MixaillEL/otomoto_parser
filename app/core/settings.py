@@ -5,8 +5,20 @@ from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# Resolve .env path relative to project root.
-_ENV_FILE = Path(__file__).resolve().parents[2] / "config" / ".env"
+_LEGACY_PROJECT_ROOT = Path(r"c:\My Project\otomoto_parser")
+
+
+def _resolve_env_file() -> Path:
+    # Prefer a real project-local config file when present; otherwise keep the
+    # documented legacy path stable for environments that rely on it.
+    project_root = Path(__file__).resolve().parents[2]
+    local_env_file = project_root / "config" / ".env"
+    if local_env_file.exists():
+        return local_env_file
+    return _LEGACY_PROJECT_ROOT / "config" / ".env"
+
+
+_ENV_FILE = _resolve_env_file()
 
 
 class AppSettings(BaseSettings):

@@ -1,6 +1,7 @@
 """Otomoto Parser – XLSX exporter using openpyxl."""
 from __future__ import annotations
 
+from datetime import date, datetime
 import logging
 from pathlib import Path
 
@@ -40,6 +41,7 @@ _COLUMNS = [
 _HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
 _HEADER_FONT = Font(color="FFFFFF", bold=True, name="Calibri", size=10)
 _ALT_FILL = PatternFill("solid", fgColor="D6E4F0")
+CellValue = str | int | float | bool | date | datetime
 
 
 class XlsxExporter:
@@ -51,6 +53,8 @@ class XlsxExporter:
 
         wb = Workbook()
         ws = wb.active
+        if ws is None:
+            raise RuntimeError("Workbook has no active worksheet")
         ws.title = "Listings"
 
         # Header row
@@ -67,16 +71,12 @@ class XlsxExporter:
         for row_idx, listing in enumerate(listings, 2):
             fill = _ALT_FILL if row_idx % 2 == 0 else None
             for col_idx, (field, _) in enumerate(_COLUMNS, 1):
-                val = getattr(listing, field, "")
-                if hasattr(val, "isoformat"):
-                    val = val.isoformat(sep=" ", timespec="seconds")
-                if val is None:
-                    val = ""
-                cell = ws.cell(row=row_idx, column=col_idx, value=val)
+                cell_value = self._to_cell_value(getattr(listing, field, ""))
+                cell = ws.cell(row=row_idx, column=col_idx, value=cell_value)
                 if fill:
                     cell.fill = fill
-                if field == "url" and val:
-                    cell.hyperlink = val
+                if field == "url" and cell_value:
+                    cell.hyperlink = str(cell_value)
                     cell.font = Font(color="0563C1", underline="single")
 
         # Auto-fit column widths
@@ -91,3 +91,15 @@ class XlsxExporter:
 
         wb.save(path)
         logger.info(f"XLSX exported: {path} ({len(listings)} rows)")
+
+    @staticmethod
+    def _to_cell_value(value: object) -> CellValue | None:
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return value.isoformat(sep=" ", timespec="seconds")
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, (str, int, float, bool)):
+            return value
+        return str(value)

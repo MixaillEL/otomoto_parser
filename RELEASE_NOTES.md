@@ -25,3 +25,17 @@ Initial public release of `otomoto_parser`.
 - `config/.env` is intentionally excluded from git
 - runtime artifacts such as `data/`, `logs/`, and `exports/` are gitignored
 - Playwright is optional and only needed for browser-mode scraping
+
+## Unreleased
+
+### Improved
+
+- Added ChangeScope integration with workspace tasks and project analysis workflow
+- Refactored search orchestration, scrape orchestration, and per-listing pipeline layers
+- Added sortable local search/export flows and database-side limiting for CLI search
+- Improved Windows CLI compatibility by removing Unicode output that breaks legacy consoles
+
+### Quality
+
+- Expanded regression coverage across search, scrape, listing pipeline, export, and query sorting
+- Project now passes ChangeScope/pyright diagnostics with `0` errors

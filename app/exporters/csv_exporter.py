@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import csv
 import logging
-from dataclasses import fields
+from datetime import date, datetime
 from pathlib import Path
 
 from app.storage.models import Listing
@@ -40,7 +40,7 @@ class CsvExporter:
         row = {}
         for col in _COLUMNS:
             val = getattr(listing, col, "")
-            if hasattr(val, "isoformat"):
+            if isinstance(val, (date, datetime)):
                 val = val.isoformat()
             row[col] = val if val is not None else ""
         return row

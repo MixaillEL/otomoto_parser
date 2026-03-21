@@ -18,7 +18,7 @@ from app.core.settings import settings
 
 app = typer.Typer(
     name="otomoto-parser",
-    help="🚗 [bold]Otomoto.pl car listing scraper[/bold]",
+    help="[bold]Otomoto.pl car listing scraper[/bold]",
     rich_markup_mode="rich",
     add_completion=False,
 )
@@ -54,7 +54,7 @@ def scrape(
         help="Path to searches.yaml config file.",
     ),
 ) -> None:
-    """🔍 Scrape otomoto.pl listings and save to the database."""
+    """Scrape otomoto.pl listings and save to the database."""
     _init()
 
     from app.clients.resilient_client import ResilientOtomotoClient
@@ -77,7 +77,7 @@ def scrape(
         )
         search_svc = SearchService(scrape_svc)
 
-        rprint(f"\n[bold cyan]🚗 Otomoto Parser[/bold cyan] – starting scrape\n")
+        rprint("\n[bold cyan]Otomoto Parser[/bold cyan] - starting scrape\n")
         results = search_svc.run_all(
             config_path=config,
             only=search,
@@ -86,7 +86,7 @@ def scrape(
 
         total = sum(results.values())
         _print_scrape_summary(results)
-        rprint(f"\n[bold green]✅ Done![/bold green] {total} listings saved to database.\n")
+        rprint(f"\n[bold green]Done![/bold green] {total} listings saved to database.\n")
 
     finally:
         client.close()
@@ -118,8 +118,12 @@ def export(
     colour: Optional[str] = typer.Option(None, help="Filter: colour substring match"),
     condition: Optional[str] = typer.Option(None, help="Filter: condition"),
     location: Optional[str] = typer.Option(None, help="Filter: location substring match"),
+    sort: str = typer.Option(
+        "newest",
+        help="Sort order: newest, oldest, price_asc, price_desc, year_desc, year_asc, mileage_asc, mileage_desc.",
+    ),
 ) -> None:
-    """📤 Export listings from the database to CSV or XLSX."""
+    """Export listings from the database to CSV or XLSX."""
     _init()
 
     from app.services.export_service import ExportService
@@ -141,18 +145,19 @@ def export(
         colour=colour,
         condition=condition,
         location=location,
+        sort=sort,
     )
 
     repo = ListingRepository()
     svc = ExportService(repo)
 
-    rprint(f"\n[bold cyan]📤 Exporting to {fmt.upper()}…[/bold cyan]")
+    rprint(f"\n[bold cyan]Exporting to {fmt.upper()}...[/bold cyan]")
     count = svc.export(fmt=fmt, output_path=Path(out_path), filters=filters or None)
 
     if count:
-        rprint(f"[bold green]✅ {count} listings exported → {out_path}[/bold green]\n")
+        rprint(f"[bold green]{count} listings exported -> {out_path}[/bold green]\n")
     else:
-        rprint("[yellow]⚠️  No listings matched the filters.[/yellow]\n")
+        rprint("[yellow]No listings matched the filters.[/yellow]\n")
 
 
 @app.command()
@@ -170,8 +175,12 @@ def search(
     colour: Optional[str] = typer.Option(None, help="Filter: colour substring match"),
     condition: Optional[str] = typer.Option(None, help="Filter: condition"),
     location: Optional[str] = typer.Option(None, help="Filter: location substring match"),
+    sort: str = typer.Option(
+        "newest",
+        help="Sort order: newest, oldest, price_asc, price_desc, year_desc, year_asc, mileage_asc, mileage_desc.",
+    ),
 ) -> None:
-    """🔎 Search listings in the local SQLite database."""
+    """Search listings in the local SQLite database."""
     _init()
 
     from app.storage.repository import ListingRepository
@@ -189,14 +198,14 @@ def search(
         colour=colour,
         condition=condition,
         location=location,
+        sort=sort,
     )
 
     repo = ListingRepository()
-    listings = repo.find_all(filters=filters or None)
-    listings = listings[: max(limit, 1)]
+    listings = repo.find_all(filters=filters or None, limit=max(limit, 1))
 
     if not listings:
-        rprint("[yellow]⚠️  No listings matched the filters.[/yellow]\n")
+        rprint("[yellow]No listings matched the filters.[/yellow]\n")
         return
 
     tbl = Table(show_header=True, header_style="bold blue", title="Search Results")
@@ -220,7 +229,7 @@ def search(
         )
 
     console.print(tbl)
-    rprint(f"\n[bold green]✅ {len(listings)} listings shown.[/bold green]\n")
+    rprint(f"\n[bold green]{len(listings)} listings shown.[/bold green]\n")
 
 
 # ---------------------------------------------------------------------------
@@ -229,7 +238,7 @@ def search(
 
 @app.command()
 def stats() -> None:
-    """📊 Show database statistics."""
+    """Show database statistics."""
     _init()
 
     from app.storage.repository import ListingRepository
@@ -240,7 +249,7 @@ def stats() -> None:
     repo = ListingRepository()
     total = repo.count()
 
-    rprint(f"\n[bold cyan]📊 Otomoto Parser – Database Stats[/bold cyan]\n")
+    rprint("\n[bold cyan]Otomoto Parser - Database Stats[/bold cyan]\n")
 
     tbl = Table(show_header=True, header_style="bold blue")
     tbl.add_column("Metric", style="dim")

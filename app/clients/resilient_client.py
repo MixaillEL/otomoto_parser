@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Protocol
 
 from bs4 import BeautifulSoup
 
@@ -13,13 +13,29 @@ from app.core.settings import settings
 logger = logging.getLogger(__name__)
 
 
+class HttpClientLike(Protocol):
+    def get(self, url: str, **kwargs) -> BeautifulSoup:
+        ...
+
+    def close(self) -> None:
+        ...
+
+
+class BrowserClientLike(Protocol):
+    def get(self, url: str, **kwargs) -> BeautifulSoup:
+        ...
+
+    def close(self) -> None:
+        ...
+
+
 class ResilientOtomotoClient:
     """Use HTTP by default and lazily switch to Playwright when blocked."""
 
     def __init__(
         self,
-        http_client: Optional[OtomotoHttpClient] = None,
-        browser_client: Optional[OtomotoBrowserClient] = None,
+        http_client: Optional[HttpClientLike] = None,
+        browser_client: Optional[BrowserClientLike] = None,
     ) -> None:
         self._http = http_client or OtomotoHttpClient(
             retries=settings.retry_attempts,
@@ -46,7 +62,7 @@ class ResilientOtomotoClient:
         if self._browser:
             self._browser.close()
 
-    def _get_browser(self) -> OtomotoBrowserClient:
+    def _get_browser(self) -> BrowserClientLike:
         if self._browser is None:
             self._browser = OtomotoBrowserClient()
         return self._browser

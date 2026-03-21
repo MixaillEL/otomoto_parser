@@ -75,6 +75,7 @@ python -m app.main stats
 ```bash
 python -m app.main search --price-max 100000 --year-min 2018
 python -m app.main search --fuel-type diesel --body-type suv --limit 10
+python -m app.main search --sort price_asc --limit 25
 ```
 
 ### Export results
@@ -82,6 +83,7 @@ python -m app.main search --fuel-type diesel --body-type suv --limit 10
 ```bash
 python -m app.main export --fmt csv --output exports/results.csv
 python -m app.main export --fmt xlsx --price-max 100000 --year-min 2018
+python -m app.main export --fmt csv --sort year_desc --output exports/newest-cars.csv
 ```
 
 ## Search Configuration
@@ -189,7 +191,67 @@ Run a quick syntax check:
 python -m py_compile app/main.py
 ```
 
+Run semantic diagnostics:
+
+```bash
+.venv\Scripts\python -m mpcode errs --project "c:\My Project\otomoto_parser" --json
+```
+
 GitHub Actions CI is configured in `.github/workflows/ci.yml`.
+
+## Project Analytics With ChangeScope
+
+This repository can be analyzed with `ChangeScope` for semantic project inspection, dependency impact checks, and refactor planning.
+
+### Install ChangeScope into the local virtual environment
+
+Clone the tool once and install it into this project's `.venv`:
+
+```bash
+git clone https://github.com/MixaillEL/mpcode.git
+.venv\Scripts\python -m pip install --upgrade setuptools wheel
+.venv\Scripts\python -m pip install .\mpcode --no-build-isolation
+```
+
+After installation you can remove the temporary clone:
+
+```bash
+rmdir /s /q mpcode
+```
+
+### Quick analytics commands
+
+Always point `ChangeScope` at this repository explicitly:
+
+```bash
+.venv\Scripts\python -m mpcode doctor --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode errs --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode graph --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode def app.main:main --project "c:\My Project\otomoto_parser" --json
+```
+
+Useful scraper-oriented symbols to inspect in this codebase:
+
+```bash
+.venv\Scripts\python -m mpcode def app.main:main --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode calls app.services.scrape_service:ScrapeService.run --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode impact app.services.listing_pipeline:ListingPipeline.process --project "c:\My Project\otomoto_parser" --json
+.venv\Scripts\python -m mpcode tests for app.services.export_service:ExportService.export --project "c:\My Project\otomoto_parser" --json
+```
+
+### VS Code
+
+The workspace includes ready-made tasks:
+
+- `ChangeScope: daemon`
+- `ChangeScope: doctor`
+- `ChangeScope: graph`
+- `ChangeScope: errs`
+
+The workspace settings also expose:
+
+- `changescope.baseUrl = http://127.0.0.1:8765`
+- `changescope.mcpCommand = ${workspaceFolder}\.venv\Scripts\python.exe -m mpcode mcp --project ${workspaceFolder}`
 
 ## Publishing Notes
 

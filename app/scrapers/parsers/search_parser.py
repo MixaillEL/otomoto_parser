@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
+from typing import Any, Optional
 
 from bs4 import BeautifulSoup, Tag
 
@@ -74,10 +74,10 @@ class SearchParser:
     def _extract_url(self, article: Tag) -> str:
         link = article.select_one("h3 a") or article.select_one("h2 a") or article.select_one("a[href*='otomoto.pl']")
         if link:
-            return link.get("href", "")
+            return self._attr_text(link, "href")
         # Try to find any link that looks like a listing URL
         for a in article.find_all("a", href=True):
-            href = a["href"]
+            href = self._attr_text(a, "href")
             if "oferta" in href or "/osobowe/" in href or "/motoryzacja/" in href:
                 return href
         return ""
@@ -111,4 +111,9 @@ class SearchParser:
         img = article.select_one("img[src]") or article.select_one("img[data-src]")
         if not img:
             return ""
-        return img.get("src") or img.get("data-src", "")
+        return self._attr_text(img, "src") or self._attr_text(img, "data-src")
+
+    @staticmethod
+    def _attr_text(tag: Tag, name: str) -> str:
+        value: Any = tag.get(name, "")
+        return value if isinstance(value, str) else ""

@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import random
 import time
-from typing import Optional
+from typing import Any, Optional, cast
 
 from bs4 import BeautifulSoup
 
@@ -44,9 +44,10 @@ class OtomotoBrowserClient:
     def get(self, url: str, **_) -> BeautifulSoup:
         """Navigate to *url* with Playwright and return a BeautifulSoup tree."""
         logger.debug("Browser GET %s", url)
-        self._page.goto(url, wait_until="networkidle", timeout=30_000)
+        page = self._require_page()
+        page.goto(url, wait_until="networkidle", timeout=30_000)
         time.sleep(random.uniform(0.4, 1.1))
-        html = self._page.content()
+        html = page.content()
         return BeautifulSoup(html, "lxml")
 
     def close(self) -> None:
@@ -82,12 +83,17 @@ class OtomotoBrowserClient:
                 },
             )
             self._page = self._context.new_page()
-            self._page.set_default_timeout(30_000)
+            self._require_page().set_default_timeout(30_000)
             logger.info(f"Playwright browser started ({self._browser_type}, headless={self._headless})")
         except ImportError:
             raise RuntimeError(
                 "Playwright is not installed. Run: pip install playwright && playwright install"
             )
+
+    def _require_page(self) -> Any:
+        if self._page is None:
+            raise RuntimeError("Browser page is not initialized")
+        return cast(Any, self._page)
 
     def __enter__(self) -> "OtomotoBrowserClient":
         return self

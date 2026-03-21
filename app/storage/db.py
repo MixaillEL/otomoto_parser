@@ -8,6 +8,7 @@ from typing import Generator
 from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.sql.schema import Table
 
 from app.storage.models import Base, Listing
 
@@ -51,7 +52,11 @@ def _ensure_indexes(engine: Engine) -> None:
     inspector = inspect(engine)
     existing = {index["name"] for index in inspector.get_indexes(Listing.__tablename__)}
 
-    for index in Listing.__table__.indexes:
+    listing_table = Listing.__table__
+    if not isinstance(listing_table, Table):
+        raise RuntimeError("Listing table metadata is not available")
+
+    for index in listing_table.indexes:
         if index.name in existing:
             continue
         logger.info("Creating missing index: %s", index.name)

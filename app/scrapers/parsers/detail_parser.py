@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Optional
+from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 
@@ -79,7 +79,7 @@ class DetailParser:
         ]:
             el = soup.select_one(sel)
             if el:
-                return el.get("src") or el.get("data-src", "")
+                return self._attr_text(el, "src") or self._attr_text(el, "data-src")
         return ""
 
     def _get_seller_type(self, soup: BeautifulSoup) -> str:
@@ -108,7 +108,7 @@ class DetailParser:
     def _get_photos(self, soup: BeautifulSoup) -> list[str]:
         photos: list[str] = []
         for img in soup.select("img[src], img[data-src]"):
-            src = img.get("src") or img.get("data-src", "")
+            src = self._attr_text(img, "src") or self._attr_text(img, "data-src")
             if src and src not in photos and ("img" in src or "photo" in src or "image" in src):
                 photos.append(src)
         return photos[:50]
@@ -116,8 +116,9 @@ class DetailParser:
     def _get_published_at(self, soup: BeautifulSoup) -> str:
         for selector in ('meta[property="article:published_time"]', 'meta[name="datePublished"]'):
             el = soup.select_one(selector)
-            if el and el.get("content"):
-                return el["content"]
+            content = self._attr_text(el, "content") if el else ""
+            if content:
+                return content
 
         for script in soup.select('script[type="application/ld+json"]'):
             try:
@@ -212,3 +213,8 @@ class DetailParser:
                 if found:
                     return found
         return None
+
+    @staticmethod
+    def _attr_text(tag: Tag, name: str) -> str:
+        value: Any = tag.get(name, "")
+        return value if isinstance(value, str) else ""

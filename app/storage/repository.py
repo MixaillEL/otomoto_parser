@@ -39,7 +39,7 @@ class ListingRepository:
                 logger.debug(f"Inserted listing {data.otomoto_id}")
                 return listing
 
-    def find_all(self, filters: Optional[dict] = None) -> list[Listing]:
+    def find_all(self, filters: Optional[dict] = None, limit: Optional[int] = None) -> list[Listing]:
         """Return all listings matching optional *filters* dict.
 
         Supported filter keys:
@@ -48,6 +48,8 @@ class ListingRepository:
         """
         with get_session() as session:
             stmt = self._query_engine.build_query(filters or {})
+            if limit is not None:
+                stmt = stmt.limit(max(int(limit), 1))
             return list(session.scalars(stmt).all())
 
     def count(self) -> int:

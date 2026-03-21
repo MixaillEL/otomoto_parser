@@ -3,19 +3,23 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Protocol
 
 from app.exporters.csv_exporter import CsvExporter
 from app.exporters.xlsx_exporter import XlsxExporter
-from app.storage.repository import ListingRepository
 
 logger = logging.getLogger(__name__)
+
+
+class ListingReaderLike(Protocol):
+    def find_all(self, filters: Optional[dict] = None) -> list:
+        ...
 
 
 class ExportService:
     """Queries the DB and writes results to CSV or XLSX."""
 
-    def __init__(self, repo: ListingRepository) -> None:
+    def __init__(self, repo: ListingReaderLike) -> None:
         self._repo = repo
         self._csv = CsvExporter()
         self._xlsx = XlsxExporter()

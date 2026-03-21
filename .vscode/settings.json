@@ -1,4 +1,0 @@
-{
-  "changescope.baseUrl": "http://127.0.0.1:8765",
-  "changescope.mcpCommand": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m mpcode mcp --project ${workspaceFolder}"
-}

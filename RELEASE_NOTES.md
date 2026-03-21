@@ -30,7 +30,6 @@ Initial public release of `otomoto_parser`.
 
 ### Improved
 
-- Added ChangeScope integration with workspace tasks and project analysis workflow
 - Refactored search orchestration, scrape orchestration, and per-listing pipeline layers
 - Added sortable local search/export flows and database-side limiting for CLI search
 - Improved Windows CLI compatibility by removing Unicode output that breaks legacy consoles
@@ -38,4 +37,4 @@ Initial public release of `otomoto_parser`.
 ### Quality
 
 - Expanded regression coverage across search, scrape, listing pipeline, export, and query sorting
-- Project now passes ChangeScope/pyright diagnostics with `0` errors
+- Project now passes static type diagnostics with `0` errors
